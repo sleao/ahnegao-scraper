@@ -14,17 +14,22 @@ class Scraper:
   def __del__(self):
     self.saveCache()
 
-  def saveCache(self):
+  def _saveCache(self):
     arq = open('cache', 'wb')
     pickle.dump(self.lst, arq)
 
-  def loadCache(self):
+  def _loadCache(self):
     lst = pickle.load(open('cache', 'rb'))
     return lst
 
-  def clearCache(self):
+  def _clearCache(self):
     self.lst = []
     self.saveCache()
+    return True
+
+  def _addToCache(self, link):
+    video_id = link.split('/')[-1]
+    self.lst.append(video_id)
 
   def scrape(self, page=''):
     links = []
@@ -36,12 +41,9 @@ class Scraper:
       if a.split('/')[-1] not in self.lst:
         a = re.sub('/embed', '', a)
         links.append(a)
-        self.keepTrack(a)
+        self._addToCache(a)
     return links
 
-  def keepTrack(self, link):
-    video_id = link.split('/')[-1]
-    self.lst.append(video_id)
 
   def run(self, pages=[]):
     r = []
@@ -51,11 +53,4 @@ class Scraper:
 
 
 if __name__ == "__main__":
-  if len(sys.argv) > 1:
-    print(sys.argv)
-    if sys.argv[1] == '-c':
-      Scraper().clearCache()
-    elif sys.argv:
-      print(Scraper().run(sys.argv[1:]))
-  else:
-    print(Scraper().run())
+  print(Scraper().run())
